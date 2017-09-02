@@ -11,6 +11,8 @@ import type {
   BabelCallExpression,
 } from '../types';
 
+import buildPrevalCodeFrame from './buildPrevalCodeFrame';
+
 /**
  * const header = css`
  *   color: ${header.color};
@@ -94,7 +96,11 @@ export default function(
   path.node.quasi.expressions = [];
 
   const moduleIds = getRelevantModulesCacheKeys(env);
-  path.parentPath.traverse(getPrevalPluginVisitor(babel), state);
+  try {
+    path.parentPath.traverse(getPrevalPluginVisitor(babel), state);
+  } catch (error) {
+    throw buildPrevalCodeFrame(error, state);
+  }
   clearModulesCache(moduleIds, env);
 
   const variableDeclarationPath = path.findParent(
